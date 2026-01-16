@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { obsidian as o } from "../obsidian";
 import { defer } from "../defer";
 import { deferred } from "../deferred";

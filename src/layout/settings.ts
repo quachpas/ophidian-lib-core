@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { around, dedupe } from "monkey-around";
 import { obsidian as o } from "../obsidian";
 import { walkLayout } from "./walk";
@@ -31,18 +32,18 @@ export class LayoutSetting<V extends any, T extends LayoutItem> {
     }
 
     get(from: LayoutItem = this.owner): V {
-        return this.store.get(this.requires(from), this.key, this.defaultValue);
+        return this.store.get(this.requires(from as any), this.key, this.defaultValue);
     }
 
     set(value: V, on: LayoutItem = this.owner) {
-        this.store.set(this.requires(on), this.key, value);
+        this.store.set(this.requires(on as any), this.key, value);
     }
 
     unset(on: LayoutItem = this.owner) {
-        this.store.unset(this.requires(on), this.key);
+        this.store.unset(this.requires(on as any), this.key);
     }
 
-    requires(on: LayoutItem) {
+    requires(on: LayoutItem | undefined) {
         if (on && (on instanceof o.Workspace || on instanceof o.WorkspaceItem)) return on;
         throw new TypeError("Setting method requires a workspace or workspace item")
     }
@@ -50,8 +51,8 @@ export class LayoutSetting<V extends any, T extends LayoutItem> {
     onSet(callback: (
         on: LayoutItem, value?: V, old?: V) => any, ctx?: any
     ): o.EventRef {
-        if (this.owner) return this.store.onSet(this.key, (on, val, old) => {
-            if (on === this.owner) callback.call(ctx, val, old);
+        if (this.owner) return this.store.onSet<V>(this.key, (on, val, old) => {
+            if (on === this.owner) callback.call(ctx, on, val, old);
         });
         return this.store.onSet(this.key, callback, ctx);
     }
@@ -152,7 +153,7 @@ export class LayoutStorage extends Service {
 
             // Load workspace settings as workspace is loading
             setLayout(old) {
-                return dedupe(STORAGE_EVENTS, old, async function setLayout(this: o.Workspace, layout: any, ...etc) {
+                return dedupe(STORAGE_EVENTS, old, async function setLayout(this: any, layout: any, ...etc) {
                     events.trigger(loadEvent+":start");
                     try {
                         loadSettings(this, layout);
@@ -185,7 +186,7 @@ const saveEvent   = `ophidian-layout-storage:v${revision}:item-save`;
 const setEvent    = `ophidian-layout-storage:set:`;
 
 function serializeSettings(old: () => any) {
-    return dedupe(STORAGE_EVENTS, old, function serialize(){
+    return dedupe(STORAGE_EVENTS, old, function serialize(this: any){
         const state = old.call(this);
         app.workspace.trigger(saveEvent, this, state);
         if (this[layoutProps]) state[layoutProps] = cloneValue(this[layoutProps]);

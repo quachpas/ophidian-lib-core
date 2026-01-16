@@ -10,6 +10,9 @@
   "license": "ISC",
   "type": "module",
   "module": "src/index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
   "exports": {
     ".": "./src/index.ts"
   },
@@ -18,8 +21,8 @@
     "@preact/signals-core": "^1.4",
     "defaults": "^2.0.1",
     "i18next": "^20.3.2",
-    "monkey-around": "^2.3",
-    "obsidian": "1.2.8",
+    "monkey-around": "^2.3.0",
+    "obsidian": "1.4.4",
     "to-use": "^0.3.2"
   },
   "devDependencies": {

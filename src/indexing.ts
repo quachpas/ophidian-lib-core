@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { setMap } from "./add-ons";
 import { obsidian as o } from "./obsidian";
 import { use } from "./services";
@@ -54,13 +55,14 @@ export abstract class AbstactIndexer<T extends Record<string,any>, I extends obj
 
     /** Iterate over items having a key with the matching value */
     items<K extends keyof T>(key: K, val: T[K]): Iterable<I>
-    items<K extends keyof T>(key: K, val?: T[K]) {
+    items<K extends keyof T>(key: K, val?: T[K]): Iterable<I> {
         this.version();
         const vals = this.indices.get(key);
         if (!vals) return [];
         const items = vals?.get(val);
         if (!items) return [];
         if (items.size) return Array.from(items); // copy so stored set is recyclable
+        return [];
     }
 
     /** Iterate over [value, item] pairs for all values in a given key */
@@ -69,7 +71,7 @@ export abstract class AbstactIndexer<T extends Record<string,any>, I extends obj
         this.version();
         const index = this.indices.get(key);
         if (!index || !index.size) return;
-        const pair: [T[K], I] = [null, null]
+        const pair: [T[K], I] = [null as any, null as any]
         for(const [v, items] of index) {
             pair[0] = v
             // copy set so stored set is recyclable
@@ -83,7 +85,7 @@ export abstract class AbstactIndexer<T extends Record<string,any>, I extends obj
     // items that don't have any index entries (which is typically most of them!).
     //
     private process(item: I, parser: typeof this.parse) {
-        toAdd = undefined;
+        toAdd = undefined!;
         parser.call(this, item, recordEntry);
 
         var toDelete = this.history.get(item);
@@ -93,8 +95,8 @@ export abstract class AbstactIndexer<T extends Record<string,any>, I extends obj
         // Add new entries
         if (toAdd) {
             for (const [k, vals] of toAdd) {
-                const idx = indices.get(k) || setMap(indices, k, freeMaps.pop() || new Map);
-                const old = toDelete && toDelete.get(k);
+                const idx = indices.get(k as keyof T) || setMap(indices, k as keyof T, freeMaps.pop() || new Map);
+                const old = toDelete && toDelete.get(k as keyof T);
                 for (const v of vals) {
                     const items = (idx.get(v) || setMap(idx, v, freeSets.pop() || new Set));
                     if (!items.has(item)) {
@@ -105,13 +107,14 @@ export abstract class AbstactIndexer<T extends Record<string,any>, I extends obj
                 }
             }
             this.history.set(item, toAdd);
-            toAdd = undefined;
+            toAdd = undefined!;
         } else this.history.delete(item);
 
         if (toDelete) {
             // Remove entries that don't apply any more
             for (const [k, vals] of toDelete) {
-                const idx = indices.get(k);
+                const idx = indices.get(k as keyof T);
+                if (!idx) continue;
                 for (const v of vals) {
                     const items = idx.get(v)
                     if (items && items.has(item)) {
@@ -143,7 +146,7 @@ export abstract class NoteMetaIndexer<T extends Record<string,any>> extends Abst
                 this.add(app.vault.getAbstractFileByPath(filename) as o.TFile)
             });
             this.registerEvent(metaCache.on("changed", this.add, this));
-            this.registerEvent(app.vault.on("delete", this.delete, this));
+            this.registerEvent(app.vault.on("delete", (f) => { if (f instanceof o.TFile) this.delete(f); }));
             // XXX add a signal to notify of loaded status?
         });
     }

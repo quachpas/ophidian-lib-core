@@ -1,17 +1,16 @@
-// @ts-nocheck
 import { deferred } from "../deferred";
 import { Dialog } from "./dialog";
-
 export class Confirm extends Dialog {
-    value: boolean = false;
-
+    constructor() {
+        super(...arguments);
+        this.value = false;
+    }
     onOK(_) {
         this.value = true;
     }
-
-    confirm(): Promise<boolean> {
+    confirm() {
         this.addCancelButton();
-        const {resolve, promise} = deferred<boolean>();
+        const { resolve, promise } = deferred();
         this.onClose = () => resolve(this.value);
         this.open();
         return promise;

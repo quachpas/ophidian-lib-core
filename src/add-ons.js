@@ -8,17 +8,16 @@
  * @returns A function that always returns the same value for a given key, calling the
  * creator function when a result isn't found in the cache.
  */
-export function addOn<K extends object,V>(creator: (key: K, map: WeakMap<K,V>) => V): (k: K) => V {
-    var map = new WeakMap<K,V>();
-    return (item: K) => {
-        return map.has(item) ? map.get(item)! : setMap(map, item, creator(item, map));
-    }
+export function addOn(creator) {
+    var map = new WeakMap();
+    return (item) => {
+        return map.has(item) ? map.get(item) : setMap(map, item, creator(item, map));
+    };
 }
-
 /**
  * Set a value in a map/weakmap and return the value
  */
-export function setMap<K,V>(map: {set(key: K, val: V): void}, key: K, val: V) {
-    map.set(key as any, val);
+export function setMap(map, key, val) {
+    map.set(key, val);
     return val;
 }

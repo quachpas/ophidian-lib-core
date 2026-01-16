@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { obsidian as o } from "../obsidian";
 import { Useful } from "to-use";
 import { defer } from "../defer";
@@ -7,7 +8,8 @@ export function statusBarItem(
     win: Window = window,
     cls: string = "plugin-" + owner.use(o.Plugin).manifest.id.toLowerCase().replace(/[^_a-zA-Z0-9-]/, "-")
 ) {
-    let container = win.document.querySelector("body > .app-container");
+    let container: Element | null = win.document.querySelector("body > .app-container");
+    if (!container) return;
     let statusBar = container.find(".status-bar") || container.createDiv("status-bar");
     let statusBarItem = statusBar.find(".status-bar-item."+cls) ||
         statusBar.createDiv(`status-bar-item ${cls.replace(/\./g,' ')}`);

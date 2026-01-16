@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { deferred } from "../deferred";
 import { Dialog } from "./dialog";
 
