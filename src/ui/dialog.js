@@ -1,5 +1,5 @@
+// @ts-nocheck
 import { obsidian as o } from "../obsidian";
-import "./dialog.scss";
 export class Dialog extends o.Modal {
     onOK(e) {
         return false;

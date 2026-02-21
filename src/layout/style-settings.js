@@ -1,31 +1,32 @@
-import { around } from "monkey-around";
-import { Service } from "../services";
+// @ts-nocheck
 import { obsidian as o } from "../obsidian";
-/** use() this to make your plugin support dynamic Style Settings
- *
- * Currently, Obsidian doesn't announce CSS changes when plugins
- * load, so Style Settings doesn't update when you update a plugin
- * or install a new one.  This service takes care of that for you,
- * telling Style Settings to update after a plugin loads its CSS.
- *
- * To take effect, this service must be use()d as a plugin property,
- * or else it will miss the timing to capture the loadCSS event.
-**/
-export class StyleSettings extends Service {
-    onload() {
-        const self = this, plugin = this.use(o.Plugin);
-        this.register(around(plugin, {
-            loadCSS(old) {
-                return async function () {
-                    await old.call(this);
-                    self.triggerReparse();
-                    this.register(() => self.triggerReparse());
-                };
-            }
-        }));
+import { use } from "../services";
+import { LayoutSetting } from "./settings";
+export function styleSettings(styles) {
+    return function (target) {
+        return new StyleSettings(use.service(target), styles);
+    };
+}
+export class StyleSettings extends o.Component {
+    constructor(use, styles) {
+        super();
+        this.use = use;
+        this.styles = styles;
+        this.settings = new LayoutSetting(this.use, "styles", this.styles);
+        this.onload();
     }
-    triggerReparse() {
-        if (app.workspace.layoutReady)
-            app.workspace.trigger("parse-style-settings");
+    onload() {
+        this.register(this.settings.onSet(this.apply, this));
+        this.apply();
+    }
+    apply(styles = this.settings.get()) {
+        const { containerEl } = this.use.this.view; // XXX
+        for (const cls in styles) {
+            containerEl.toggleClass(cls, styles[cls]);
+        }
+    }
+    toggle(cls) {
+        const styles = this.settings.get();
+        this.settings.set({ ...styles, [cls]: !styles[cls] });
     }
 }

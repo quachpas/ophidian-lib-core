@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Wrap preact signals to use @maverick-js/signals API style, w/always-async
  * side effects, nested effect() support, and aSignal()/aSignal.set(value) interface.

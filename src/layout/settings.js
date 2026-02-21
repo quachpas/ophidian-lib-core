@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { around, dedupe } from "monkey-around";
 import { obsidian as o } from "../obsidian";
 import { walkLayout } from "./walk";

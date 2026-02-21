@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { setMap } from "./add-ons";
 import { obsidian as o } from "./obsidian";
 import { use } from "./services";

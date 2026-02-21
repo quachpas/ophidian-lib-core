@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { obsidian as o } from "../obsidian";
 export function isLeafAttached(leaf) {
     const ws = app.workspace, root = leaf === null || leaf === void 0 ? void 0 : leaf.getRoot();
